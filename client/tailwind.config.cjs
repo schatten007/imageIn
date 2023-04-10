@@ -1,7 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 
 module.exports = {
-  content: ['./src/**/*.{js,jsx}'],
+  darkMode: 'class',
+  content: [
+    './src/**/*.{js,jsx}',
+    "./node_modules/tw-elements/dist/js/**/*.js"
+],
   theme: {
     extend: {
       screens: {
@@ -16,6 +20,6 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tw-elements/dist/plugin")],
 };
 
