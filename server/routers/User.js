@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/User');
-const sendVerificationEmail = require('../middleware/mailer');
 
 // POST@user/register
 router.post('/register', async (req, res) => {
@@ -22,8 +20,8 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign({email}, process.env.SECRET, { expiresIn: '1d'});
     user.verifyToken = token;
     await user.save();
+
     
-    sendVerificationEmail(user.email, token);
     res.status(201).json({ message: "User registered successfully", user: { user }})
   } catch(e){
     console.log(e);
@@ -34,8 +32,6 @@ router.post('/register', async (req, res) => {
 // POST@user/login
 router.post('/login', (req, res) => {
   // your code here
-
-
   res.status(200).send(req.headers.authorization)
 });
 
