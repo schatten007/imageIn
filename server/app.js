@@ -1,8 +1,8 @@
 const express = require('express');
-require('./config/mongoose')
-require('./config/passport')
 require('dotenv').config()
 const cors = require('cors');
+require('./config/mongoose')
+require('./config/passport')
 const app = express();
 const userRouter = require('./routers/User');
 

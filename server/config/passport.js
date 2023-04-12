@@ -2,25 +2,29 @@ const passport = require("passport");
 const passportJWT = require("passport-jwt");
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
-const User = require("../models/user"); // Import your user model
+const User = require("../models/User"); // Import your user model
 
-const opts = {};
-opts.jwtFromRequest = ExtractJWT.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = "your_jwt_secret_key_here"; // Replace with your JWT secret key
+// Set up JWT options
+const JWTOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.SECRET
+};
 
-passport.use(
-  new JWTStrategy(opts, (jwt_payload, done) => {
-    User.findOne({ _id: jwt_payload.sub }, (err, user) => { // sub is the subject field of the token
-      if (err) {
-        return done(err, false);
-      }
-      if (user) {
-        return done(null, user);
-      } else {
+
+// Use JWT Strategy to authenticate user requests
+passport.use(new JWTStrategy(JWTOptions, (jwtPayload, done) => {
+  User.findOne({ _id: jwtPayload.userId })
+    .then((user) => {
+      if (!user) {
         return done(null, false);
       }
+      return done(null, user);
+    })
+    .catch((err) => {
+      return done(err, false);
     });
-  })
-);
+}));
 
-module.exports = passport;
+
+// Export passport with JWT authentication
+module.exports = passport.authenticate('jwt', { session: false });
