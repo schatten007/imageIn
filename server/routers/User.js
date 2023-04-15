@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const passport = require('../config/passport');
-const { ensureAuthenticated } = require('../middleware/auth');
+const { ensureAuthenticated, loginMiddleware, preventLogin } = require('../middleware/auth');
  
 
 // POST@user/register
@@ -33,20 +33,49 @@ router.post('/register', async (req, res) => {
 });
 
 // POST@user/login
-router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
-  // your code here
-  res.status(200).send(req.user)
-});
+router.post('/login', preventLogin, loginMiddleware, (req, res) => {
+    const { user, token } = req;
+    res.status(200).json({user, token, message: "Login Successful!"})
+  });
 
-// GET user profile
-router.get('/profile/:userId', ensureAuthenticated, (req, res) => {
-  res.status(200).send(`Here is the information for user ${req.params.userId}`)
-});
 
 // POST logout
-router.post('/logout', (req, res) => {
-  // your code here
+router.post('/logout', ensureAuthenticated, async (req, res) => {
+  // Remove the Token from User Document
+  try{
+
+    req.user.tokens = req.user.tokens.filter(token =>{
+      console.log(token.token === req.token)
+      return token.token != req.token
+    })
+
+    await req.user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'User successfully logged out.'
+    });
+  }catch(e){
+    res.status(500).json({ success: false, message: e.message });
+  }
 });
+
+router.post('/logoutall', ensureAuthenticated, async (req, res) => {
+  // Remove the All Tokens from User Document
+  try{
+    req.user.tokens = [];
+
+    await req.user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'User successfully logged from all devices.'
+    });
+  }catch(e){
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 
 // GET@Email Verification
 router.get('/verify-email/:token', async (req, res) => {
@@ -72,6 +101,11 @@ router.get('/verify-email/:token', async (req, res) => {
   }
 });
 
+// GET user profile
+router.get('/me', ensureAuthenticated, (req, res) => {
+  
+  res.status(200).json({ message: 'User information retrieved', user: req.user})
+});
 
 
 module.exports = router;

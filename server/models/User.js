@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt');
 
 const sendVerificationEmail = require('../middleware/mailer');
@@ -33,15 +34,45 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: [validator.isEmail, 'Invalid email address']
   },
+  tokens: [{
+    token: {
+      type: String,
+      required: true
+    }
+  }],
   isVerified: {
     type: Boolean,
     default: false,
   },
   verifyToken: {
     type: String,
-    required: true
   }
 });
+
+// Middleware to generate Auth Tokens
+userSchema.methods.generateAuthToken = async function(){
+  try{
+  const user = this;
+  const token = jwt.sign({ _id: user._id.toString() }, process.env.SECRET);
+
+  user.tokens = user.tokens.concat( { token } );
+
+  await user.save();
+
+  return token;
+} catch(e) {
+  return e.message;
+}
+}
+
+// Middleware to remove the password field from user object before returning it
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  delete user.tokens;
+  return user;
+};
+
 
 // Password Encryption Middleware
 userSchema.pre('save', function(next) {
@@ -79,14 +110,12 @@ userSchema.methods.comparePassword = function(candidatePassword, callback) {
 };
 
 
-
 userSchema.post('save', function(doc, next){
  try{ 
   const email = this.email;
   const token = this.verifyToken;
   
   // sendVerificationEmail(email, token);
-  
   next();
 }catch(e) {
   next(e.message);
