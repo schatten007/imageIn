@@ -28,9 +28,9 @@ const Navbar = () => {
           <Link to="/generate" className="text-gray-300 hover:text-white text-sm pt-2">
             <p className="text-xs font-sans">New Artwork</p>
           </Link>
-          <a href="profile/123" className="text-gray-300 hover:text-white text-sm pt-2">
+          <Link to="profile/123" className="text-gray-300 hover:text-white text-sm pt-2">
             <p className="text-xs font-sans">Account</p>
-          </a>
+          </Link>
         </div>
         <button className="flex pace-x-4 container justify-end align-center md:hidden text-gray-300 hover:text-white">
             <Bars3Icon className="w-5 my-2"/>
