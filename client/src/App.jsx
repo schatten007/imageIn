@@ -2,7 +2,7 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import { Layout } from './components'
-import { ErrorPage, Home, ImageGeneration, Signup, Profile } from './pages'
+import { ErrorPage, Home, ImageGeneration, Register, Profile, Login } from './pages'
 
 
 const App = () => {
@@ -12,7 +12,8 @@ const App = () => {
         <Routes>
           <Route path='/' element={ <Layout /> }>
             <Route index element={<Home />} />
-            <Route path='signup' element={<Signup />} />
+            <Route path='register' element={<Register />} />
+            <Route path='login' element={<Login />} />
             <Route path='profile/:id' element={<Profile />} />
             <Route path='generate' element={<ImageGeneration />} />
           </Route>
