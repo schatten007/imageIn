@@ -5,6 +5,7 @@ import Layout from './Layout'
 import SearchBox from "./SearchBox";
 import ImageGallery from "./ImageGallery";
 import LoadingSpinner from "./LoadingSpinner";
+import ProtectedRoute from "./ProtectedRoute";
 
 export { 
     Navbar,
@@ -13,5 +14,6 @@ export {
     Layout,
     SearchBox,
     ImageGallery,
-    LoadingSpinner
+    LoadingSpinner,
+    ProtectedRoute
  };

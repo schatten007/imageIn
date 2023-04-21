@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Navigate } from "react-router-dom";
 import * as Yup from "yup";
 
 import { register } from "../app/slices/auth";
@@ -61,6 +62,10 @@ const Register = () => {
         setSuccessful(false);
       });
   };
+
+  if (isLoggedIn) {
+    return <Navigate to="/profile" />;
+  }
 
   return (
   <div className="flex flex-col items-center w-full min-h-screen p-20">

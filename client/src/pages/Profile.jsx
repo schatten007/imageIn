@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux';
 import { Tab } from '@headlessui/react';
-import axios from "axios";
 import Avatar from '../components/Avatar';
 
 
 const Profile = () => {
-  const [userData, setUserData] = useState({});
+  const { user } = useSelector((state) => state.auth)
 
   return (
     <>
