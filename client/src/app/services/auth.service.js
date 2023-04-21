@@ -1,23 +1,21 @@
-import axios from "axios";
-import API_URL from '../../apis/imageinServer'
+import axios from '../../apis/imageinServer'
 
 
 const register = (username, email, password) => {
-  return axios.post(API_URL + "/user/register", {
+  return axios.post("/user/register", {
     username,
     email,
     password,
   });
 };
 
-const login = (username, password) => {
-  return axios
-    .post(API_URL + "/user/login", {
-      username,
+const login = (email, password) => {
+  return axios.post("/user/login", {
+      email,
       password,
     })
     .then((response) => {
-      if (response.data.accessToken) {
+      if (response.data.token) {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
 

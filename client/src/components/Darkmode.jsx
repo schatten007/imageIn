@@ -1,17 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Switch } from '@headlessui/react'
 import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
 import { useDispatch, useSelector } from "react-redux";
+import { toggleDarkmode } from "../app/slices/darkmode";
 
 const DarkMode = () => {
-  const [enabled, setEnabled] = useState(false);
-  // const dispatch = useDispatch();
-  // const enabled = useSelector((state) => state.darkmode.value)
+  // const [enabled, setEnabled] = useState(false);
+  const dispatch = useDispatch();
+  const enabled = useSelector((state) => state.darkmode)
+
+  useEffect(()=>{ 
+    if(enabled) 
+    document.documentElement.classList.add("dark");
+  },[dispatch])
 
   const handleSwitchToggle = () => {
-    setEnabled(!enabled);
-    // dispatch(toggle());
-    localStorage.setItem('ImageIn Darkmode', JSON.stringify(!enabled));
+    // setEnabled(!enabled);
+    // localStorage.setItem('darkmode', JSON.stringify(!enabled));
+    dispatch(toggleDarkmode());
     document.documentElement.classList.toggle("dark");
   };
 

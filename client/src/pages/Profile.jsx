@@ -7,15 +7,6 @@ import Avatar from '../components/Avatar';
 const Profile = () => {
   const [userData, setUserData] = useState({});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios.get("http://localhost:8042/user/me");
-      console.log(result)
-      setUserData(result.data);
-    };
-    fetchData();
-  }, []);
-
   return (
     <>
     <div className="min-h-screen space-y-8 flex flex-col align-center mx-8 sm:mx-16 lg:mx-32 py-6 sm:py-8 lg:py-12">

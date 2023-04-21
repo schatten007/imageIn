@@ -22,21 +22,20 @@ const Login = () => {
   }, [dispatch]);
 
   const initialValues = {
-    username: "",
     email: "",
     password: "",
   };
 
   const validationSchema = Yup.object().shape({
-    username: Yup.string().required("Username is required!"),  
-    password: Yup.string().required('Password is required'),
+    email: Yup.string().email("Enter a valid email address!").required("Email is required!"),  
+    password: Yup.string().required('Password is required!'),
   });
 
   const handleLogin = (formValue) => {
-    const { username, password } = formValue;
+    const { email, password } = formValue;
     setLoading(true);
 
-    dispatch(login({ username, password }))
+    dispatch(login({ email, password }))
       .unwrap()
       .then(() => {
         navigate("/profile");
@@ -66,12 +65,12 @@ const Login = () => {
     >
       <Form>
         <div className="mb-4">
-          <label htmlFor="username" className="block text-sm font-bold mb-2">
-            Username
+          <label htmlFor="email" className="block text-sm font-bold mb-2">
+            Email
           </label>
-          <Field name="username" type="text" className="border-2 w-full p-3 rounded-md" />
+          <Field name="email" type="text" className="border-2 w-full p-3 rounded-md" />
           <ErrorMessage
-            name="username"
+            name="email"
             component="div"
             className="text-red-500 text-xs mt-1"
           />

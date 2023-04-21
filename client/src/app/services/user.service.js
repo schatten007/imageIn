@@ -1,5 +1,4 @@
 import axios from "axios";
-import authHeader from "./auth-header";
 import API_URL from '../../apis/imageinServer'
 
 const getPublicContent = () => {
@@ -7,15 +6,15 @@ const getPublicContent = () => {
 };
 
 const getUserBoard = () => {
-  return axios.get(API_URL + "user", { headers: authHeader() });
+  return axios.get(API_URL + "user");
 };
 
 const getModeratorBoard = () => {
-  return axios.get(API_URL + "mod", { headers: authHeader() });
+  return axios.get(API_URL + "mod");
 };
 
 const getAdminBoard = () => {
-  return axios.get(API_URL + "admin", { headers: authHeader() });
+  return axios.get(API_URL + "admin");
 };
 
 const userService = {
