@@ -35,7 +35,7 @@ router.post('/register', async (req, res) => {
 // POST@user/login
 router.post('/login', preventLogin, loginMiddleware, (req, res) => {
     const { user, token } = req;
-    res.status(200).json({user, token, message: "Login Successful!"})
+    res.status(200).send({token})
   });
 
 

@@ -28,7 +28,7 @@ const Navbar = () => {
           <Link to="/generate" className="text-gray-300 hover:text-white text-sm pt-2">
             <p className="text-xs font-sans">New Artwork</p>
           </Link>
-          <Link to="profile/123" className="text-gray-300 hover:text-white text-sm pt-2">
+          <Link to="profile" className="text-gray-300 hover:text-white text-sm pt-2">
             <p className="text-xs font-sans">Account</p>
           </Link>
         </div>

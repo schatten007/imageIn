@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
+import { populate } from '../app/slices/user';
 import { Tab } from '@headlessui/react';
 import Avatar from '../components/Avatar';
 
 
 const Profile = () => {
-  const { user } = useSelector((state) => state.auth)
+  const token  = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user)
 
+  useEffect(() => {
+    dispatch(populate())
+  }, [dispatch])
+  
   return (
     <>
     <div className="min-h-screen space-y-8 flex flex-col align-center mx-8 sm:mx-16 lg:mx-32 py-6 sm:py-8 lg:py-12">
@@ -15,7 +22,7 @@ const Profile = () => {
       </div>
 
       <div className="min-w-full">
-        <h1 className="font-bold text-[32px] dark:text-gray-200">Profile</h1>
+        <h1 className="font-bold text-[32px] dark:text-gray-200">{(user && user.username) && user.username || "Username"}</h1>
       </div>
       
       <TabComponent />

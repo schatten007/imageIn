@@ -1,27 +1,14 @@
-import axios from "axios";
-import API_URL from '../../apis/imageinServer'
+import axios from '../../apis/imageinServer'
 
-const getPublicContent = () => {
-  return axios.get(API_URL + "all");
-};
+export const getUserImages = () => {
 
-const getUserBoard = () => {
-  return axios.get(API_URL + "user");
-};
+}
 
-const getModeratorBoard = () => {
-  return axios.get(API_URL + "mod");
-};
-
-const getAdminBoard = () => {
-  return axios.get(API_URL + "admin");
-};
-
-const userService = {
-  getPublicContent,
-  getUserBoard,
-  getModeratorBoard,
-  getAdminBoard,
-};
-
-export default userService
+export const getUserProfile = async () => {
+    try{
+      const response = await axios.get("/user/me");
+      return response;
+    }catch(e){
+      return e;
+    }
+}
