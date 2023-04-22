@@ -6,7 +6,6 @@ import Avatar from '../components/Avatar';
 
 
 const Profile = () => {
-  const token  = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user)
 
@@ -22,16 +21,16 @@ const Profile = () => {
       </div>
 
       <div className="min-w-full">
-        <h1 className="font-bold text-[32px] dark:text-gray-200">{(user && user.username) && user.username || "Username"}</h1>
+        <h1 className="font-bold text-[32px] text-white dark:text-gray-200">Welcome {(user && user.username) && user.username || "Username"}</h1>
       </div>
       
-      <TabComponent />
+      <TabComponent user={user} />
     </div>
     </>
   )
 }
 
-function TabComponent() {
+function TabComponent({ user }) {
   const [currentTab, setCurrentTab] = useState(0);
   
   function classNames(...classes) {
@@ -40,7 +39,7 @@ function TabComponent() {
   
   const ImagesTab = () => {
     return(
-      <div className="py-6">
+      <div className="py-6 space-y-6 px-5">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
            Tab Content
         </h2>
@@ -52,7 +51,7 @@ function TabComponent() {
   }
   const GenerationTab = () => {
     return(
-      <div className="py-6">
+      <div className="py-6 space-y-6 px-5">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
            Tab Content
         </h2>
@@ -64,12 +63,18 @@ function TabComponent() {
   }
   const UserProfileTab = () => {
     return(
-      <div className="py-6">
+      <div className="py-6 space-y-6 px-5">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-           Tab Content
+           User Profile
         </h2>
         <p className="text-gray-500 dark:text-gray-300">
-          USER sample content for the  tab.
+          ID: <span className='text-gray-900'>{(user && user._id) && user._id || "Loading User..."}</span>
+        </p>
+        <p className="text-gray-500 dark:text-gray-300">
+          Email: <span className='text-gray-800'>{(user && user.email) && user.email || "Loading User..."}</span>
+        </p>
+        <p className="text-gray-500 dark:text-gray-300">
+          Verification Status: <span className='text-green-500'>{(user && user.isVerified) && (user.isVerified ? "Verified" : "Not Verified")}</span>
         </p>
       </div>
     )
@@ -110,7 +115,7 @@ function TabComponent() {
               </Tab>
             ))}
           </Tab.List>
-          <Tab.Panels className="px-4 py-2 dark:bg-gray-800 bg-gray-50">
+          <Tab.Panels className="px-4 py-2 dark:bg-gray-800 bg-gray-50 h-32 md:h-72">
             {tabs.map((tab, tabIndex) => (
               <Tab.Panel key={tabIndex}>
                 {tab.component}
@@ -122,6 +127,5 @@ function TabComponent() {
     </div>
   );
 }
-
 
 export default Profile
