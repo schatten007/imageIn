@@ -5,6 +5,7 @@ require('./config/mongoose')
 require('./config/passport')
 const app = express();
 const userRouter = require('./routers/User');
+const imageRouter = require('./routers/Image');
 
 const PORT = process.env.PORT || 3000;
 
@@ -13,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use('/user', userRouter);
+app.use('/images', imageRouter);
 
 app.listen(PORT, () => {
     console.log('Server is running on port ' + PORT);
