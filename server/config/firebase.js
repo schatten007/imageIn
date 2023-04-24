@@ -3,7 +3,7 @@ const { getStorage } = require("firebase/storage");
 
 const firebaseConfig = {
 
-    apiKey: "AIzaSyA5rIywCqE-t8Qgn5ojAXpi8Racw--LpAc",
+    apiKey: process.env.FIREBASE_API_KEY,
   
     authDomain: "imagein-9248b.firebaseapp.com",
   
