@@ -4,7 +4,7 @@ const router = express.Router();
 const Image = require('../models/Image');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { uploadImage, getImageURL } = require('../services/firebase.storage');
-const { getBalance, getEngines } = require('../services/stability.api');
+const { getBalance, getEngines, textToImage } = require('../services/stability.api');
 
 // ADD 1. Rate Limiter, 2. Cache
 
@@ -36,13 +36,14 @@ router.post("/generate/text2img", ensureAuthenticated, async (req, res) => {
         if(!textPrompts) throw new Error("Prompts cannot be empty.");
 
         // 1. Send Body to Image Generation Service
+        const image = await textToImage(process.env.STABILITY_API_KEY, textPrompts, req.body);
         // 2. Wait and recieve image.
         // 3. Save the image to a cloud storage.
         // 4. Get Image URL from storage.
         // 5. Save the URL into my database, along with metadata.
         // 6. Respond with image URL to Client.
         
-        res.status(200).json({message: "Done"})
+        res.status(200).json({message: "Done", image})
     } catch(error){
         
         if(error.message==="Prompts cannot be empty."){

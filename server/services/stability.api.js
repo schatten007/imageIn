@@ -3,7 +3,7 @@ const { apiClient } = require('../config/stability.api');
 // engine_id = stable-diffusion-v1-5 
 // or        = stable-diffusion-v1
 
-const apiRequest = async(path, key, body = "", method = "GET") => {
+const apiRequest = async(path, key, body = {}, method = "GET") => {
     if (!key) throw new Error("Missing API Key");
 
     const config = {
@@ -13,12 +13,12 @@ const apiRequest = async(path, key, body = "", method = "GET") => {
 
     if(method==="POST"){
         const response = await apiClient.post(path, config);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status!=200) throw new Error(`HTTP error! status: ${response.status}`);
 
         return response.data;
     }else{
         const response = await apiClient.get(path, config);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        if (response.status!==200) throw new Error(`HTTP error! status: ${response.status}`)
 
         return response.data;
     }
@@ -42,21 +42,32 @@ const getEngines = async (key) => {
     }
 }
 
-const textToImage = async(key, textPrompts, config = {}) => {
+const textToImage = async(key, positivePrompts, config = {}) => {
     try{
+        const negativePrompts = config.negativePrompts || null;
 
         const body = {
-        textPrompts: textPrompts,
-        negativePrompts: [],
+        textPrompts: [
+            {
+                text: positivePrompts,
+                weight: 0.5
+            },
+            {
+                text: negativePrompts,
+                weight: -0.5
+            }
+        ],
         height: 512,
         width: 512,
         cfgScale: 7,
         samples: 1,
         seed: 0,
         steps: 25,
-        engineId: "stable-diffusion-v1-5"
         }
-        const image = await apiRequest(`generation/${configuration.engineId}/text-to-image`, key, body, "POST");
+        
+        const image = await apiRequest(`generation/${config.engine}/text-to-image`, key, body, "POST");
+        console.log(image);
+        return image;
     }catch(error){
         throw error;
     }
@@ -64,5 +75,6 @@ const textToImage = async(key, textPrompts, config = {}) => {
 
 module.exports = {
     getBalance,
-    getEngines
+    getEngines,
+    textToImage
 }
