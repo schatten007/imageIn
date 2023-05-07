@@ -68,7 +68,7 @@ const textToImage = async(key, positivePrompts, config = {}) => {
         seed: 0,
         steps: 25,
         }
-
+        
 
         const image = await apiRequest(`generation/${config.engine}/text-to-image`, key, body, "POST");
         return image;

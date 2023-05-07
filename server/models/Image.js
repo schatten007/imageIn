@@ -22,7 +22,7 @@ const imageSchema = new mongoose.Schema({
     trim: true,
   },
   seed: {
-    type: String,
+    type: Number,
     required: true,
     trim: true,
   },

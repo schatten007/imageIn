@@ -5,6 +5,7 @@ const Image = require('../models/Image');
 const { ensureAuthenticated } = require('../middleware/auth');
 const { uploadImage, getImageURL } = require('../services/firebase.storage');
 const { getBalance, getEngines, textToImage } = require('../services/stability.api');
+const { img } = require('../constants/testimg');
 
 // ADD 1. Rate Limiter, 2. Cache
 
@@ -30,28 +31,45 @@ router.get("/info", ensureAuthenticated ,async(req, res) => {
 
 // POST_Generate New Image-PROTECTED
 router.post("/generate/text2img", ensureAuthenticated, async (req, res) => {
-    try{
+    try {
         const user = req.user;
-        const { textPrompts } = req.body;
-        if(!textPrompts) throw new Error("Prompts cannot be empty.");
-
-        // 1. Send Body to Image Generation Service
-        const image = await textToImage(process.env.STABILITY_API_KEY, textPrompts, req.body);
-        // 2. Wait and recieve image.
-        // 3. Save the image to a cloud storage.
-        // 4. Get Image URL from storage.
-        // 5. Save the URL into my database, along with metadata.
+        const { textPrompts, steps } = req.body;
+        if (!textPrompts) throw new Error("Prompts cannot be empty.");
+      
+        const negativePrompts = req.body.negativePrompts || "";
+        // 1. Send Body to Image Generation Service - REVAMP
+        const image = await textToImage(
+          process.env.STABILITY_API_KEY,
+          textPrompts,
+          req.body
+        );
+        // 2. Create the image database document and get ID.
+        const imageDocument = new Image({
+          createdBy: user._id, // Assuming a valid ObjectId for the creator
+          textPrompts,
+          negativePrompts,
+          seed: image.artifacts[0].seed,
+          steps,
+        });
+        // 3. Save the image to cloud storage.
+        await uploadImage(image.artifacts[0].base64, imageDocument._id.toString());
+        // 4. Get image URL from cloud.
+        const imgURL = await getImageURL(imageDocument._id.toString());
+        // 5. Save add URL to image document, save the document.
+        imageDocument.set("url", imgURL);
+        const savedImage = await imageDocument.save();
         // 6. Respond with image URL to Client.
-        
-        res.status(200).json({message: "Done", image})
-    } catch(error){
-        
-        if(error.message==="Prompts cannot be empty."){
-            return res.status(400).json({message: error.message});
+        res.status(200).json({ message: "Done", imgURL });
+      } catch (error) {
+        // Handle errors based on their type or message.
+        if (error instanceof mongoose.Error.ValidationError) {
+          return res.status(400).json({ message: error.message });
+        } else if (error.message === "Prompts cannot be empty.") {
+          return res.status(400).json({ message: error.message });
+        } else {
+          return res.status(500).send({ message: error.message });
         }
-
-        return res.status(500).send({message: error.message})
-    }
+      }
 })
 
 // 4. DELETE_USER Image-PROTECTED
