@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
-import { populate } from '../app/slices/user';
+import { useSelector } from 'react-redux';
 import { Tab } from '@headlessui/react';
 import Avatar from '../components/Avatar';
 
 
 const Profile = () => {
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user)
-
-  useEffect(() => {
-    dispatch(populate())
-  }, [dispatch])
   
   return (
     <>

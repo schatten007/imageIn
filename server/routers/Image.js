@@ -16,7 +16,16 @@ router.get("/all", async (req, res) => {
 })
 
 // 3. GET_User images-PROTECTED
-router.get("/user")
+router.get("/user", async (req, res) => {
+  
+  try{
+    const { page = 1, limit = 5 } = req.query;
+    const images = await Image.find()
+
+  }catch(e){
+
+  }
+})
 
 // Replace later with Error handling middleware
 router.get("/info", ensureAuthenticated ,async(req, res) => {
@@ -33,7 +42,8 @@ router.get("/info", ensureAuthenticated ,async(req, res) => {
 router.post("/generate/text2img", ensureAuthenticated, async (req, res) => {
     try {
         const user = req.user;
-        const { textPrompts, steps } = req.body;
+        const { textPrompts, steps = 20, key } = req.body;
+        if(!key) throw new Error("Add a valid API key to request body");
         if (!textPrompts) throw new Error("Prompts cannot be empty.");
       
         const negativePrompts = req.body.negativePrompts || "";

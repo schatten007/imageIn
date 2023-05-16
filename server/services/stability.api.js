@@ -50,15 +50,16 @@ const textToImage = async(key, positivePrompts, config = {}) => {
     try{
         const negativePrompts = config.negativePrompts || null;
 
+
         const body = {
         text_prompts: [
             {
                 text: positivePrompts,
-                weight: 0.5
+                weight: 0.6
             },
             {
                 text: negativePrompts,
-                weight: -0.5
+                weight: -0.6
             }
         ],
         height: 512,
