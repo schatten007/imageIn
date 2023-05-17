@@ -1,8 +1,8 @@
 import axios from '../../apis/imageinServer'
 
-export const generateImage = async () => {
+export const generateImage = async (body) => {
     try{
-        const response = await axios.get("/images/generate/text2img");
+        const response = await axios.post("/images/generate/text2img", body);
         return response;
       }catch(e){
         return e;

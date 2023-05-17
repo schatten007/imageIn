@@ -49,7 +49,7 @@ router.post("/generate/text2img", ensureAuthenticated, async (req, res) => {
         const negativePrompts = req.body.negativePrompts || "";
         // 1. Send Body to Image Generation Service - REVAMP
         const image = await textToImage(
-          process.env.STABILITY_API_KEY,
+          key,
           textPrompts,
           req.body
         );
@@ -69,12 +69,10 @@ router.post("/generate/text2img", ensureAuthenticated, async (req, res) => {
         imageDocument.set("url", imgURL);
         const savedImage = await imageDocument.save();
         // 6. Respond with image URL to Client.
-        res.status(200).json({ message: "Done", imgURL });
+        res.status(200).json({ message: "Image Generated Successfully.", imgURL });
       } catch (error) {
         // Handle errors based on their type or message.
-        if (error instanceof mongoose.Error.ValidationError) {
-          return res.status(400).json({ message: error.message });
-        } else if (error.message === "Prompts cannot be empty.") {
+        if (error.message === "Prompts cannot be empty.") {
           return res.status(400).json({ message: error.message });
         } else {
           return res.status(500).send({ message: error.message });
