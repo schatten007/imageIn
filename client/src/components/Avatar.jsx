@@ -4,7 +4,7 @@ const Avatar = () => {
   return (
     <img
         src="https://tecdn.b-cdn.net/img/new/avatars/2.webp"
-        className="w-32 rounded-full bg-white"
+        className="w-24 rounded-full bg-white"
         alt="Avatar" />
   )
 }

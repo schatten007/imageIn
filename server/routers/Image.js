@@ -9,21 +9,71 @@ const { img } = require('../constants/testimg');
 
 // ADD 1. Rate Limiter, 2. Cache
 
-// 2. GET_All images
+// 2. GET_All images (Curso based pagination)
 router.get("/all", async (req, res) => {
-    downloadImage();
-    res.status(200).json({});
+  try{
+    const { cursor = null, limit = 8 } = req.query;
+    let decryptedCursor;
+    let images;
+
+    if (cursor) {
+      decryptedCursor = cursor
+      let decrypedDate = new Date(decryptedCursor * 1000)
+      images = await Image.find({
+        time: {
+          $lt: new Date(decrypedDate),
+        },
+      })
+        .sort({ createdAt: 'desc' })
+        .limit(Number(limit) + 1)
+        .exec()
+    } else {
+      images = await Image.find()
+        .sort({ createdAt: 'desc' })
+        .limit(Number(limit) + 1)
+    }
+    console.log(images)
+    const max = images.length === Number(limit) + 1;
+    let nextCursor = null;
+    if (max) {
+      const record = images[Number(limit)]
+      var unixTimestamp = Math.floor(record.createdAt.getTime() / 1000)
+      nextCursor = unixTimestamp.toString()
+      images.pop()
+    }
+
+    res.status(200).send({
+      images,
+      paging: {
+        max,
+        nextCursor,
+      },
+    })
+
+  }catch(e){
+    console.log(e)
+    res.status(500).send({ message: e.message || e.toString() })
+  }
 })
 
 // 3. GET_User images-PROTECTED
-router.get("/user", async (req, res) => {
-  
+router.get("/user", ensureAuthenticated, async (req, res) => {
   try{
-    const { page = 1, limit = 5 } = req.query;
-    const images = await Image.find()
+    const { page = 1, limit = 8 } = req.query;
+    const user  = req.user;
+    const images = await Image.find({ createdBy: user._id })
+      .sort({ createdAt: 'desc' })
+      .skip((page-1) * limit)
+      .limit(limit * 1)
+      .exec();
 
+    const total = await Image.countDocuments();
+    const totalPages = Math.ceil(total / limit)
+    const hasMore = (page < totalPages) ? true : false;
+    
+    res.status(200).send({ images, hasMore });
   }catch(e){
-
+    res.status(500).send({ message: e.message || e.toString()})
   }
 })
 

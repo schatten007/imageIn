@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { BsBook } from "react-icons/bs";
+import { GrMoney } from "react-icons/gr";
 import { generateImage } from "../app/services/image.service";
 
 const ImageGeneration = () => {
@@ -12,6 +13,7 @@ const ImageGeneration = () => {
   const [ message, setMessage ] = useState({ keyMessage: null, promptsMessage: null });
   const [ imageURL, setImageURL ] = useState("");
   const [ imageLoading, setImageLoading ] = useState(false);
+  const [ balance, setBalance ] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -27,7 +29,8 @@ const ImageGeneration = () => {
       const keyCheck = await axios.get("https://api.stability.ai/v1/user/balance", {
       headers: { Authorization: `Bearer ${key}`}
       });
-      setMessage({...message, keyMessage: `Your remaining balance is ${keyCheck.data.credits}`});
+      setMessage({...message, keyMessage: `API connected successfully!`});
+      setBalance(keyCheck.data.credits);
       setApiKey(textInput.key);
     }catch(e){
       (e.message==="Request failed with status code 401") ? 
@@ -49,6 +52,10 @@ const ImageGeneration = () => {
       setMessage({...message, promptsMessage: "Prompts cannot be empty."});
       return;
     }
+    if(balance<=0.8){
+      setMessage({...message, promptsMessage: "Not enough credits to generate image."})
+      return;
+    }
     setImageLoading(true);
     const body = {
       key: apiKey,
@@ -64,8 +71,12 @@ const ImageGeneration = () => {
     };
     
     generateImage(body)
-      .then((response) => {
+      .then(async (response) => {
         setImageURL(response.data.imgURL);
+        const keyCheck = await axios.get("https://api.stability.ai/v1/user/balance", {
+        headers: { Authorization: `Bearer ${key}`}
+        });
+        setBalance(keyCheck.data.credits);
         setImageLoading(false);
       })
       .catch((error) => {
@@ -79,7 +90,9 @@ const ImageGeneration = () => {
       <div className="flex min-h-screen">
         <div className="w-8/12 bg-gray-200 flex-col flex space-y-8 p-12">
           <h3 className="text-3xl font-bold dark:text-white mx-0 sm:mx-12 sm:mt-0">Generation</h3>
-          <form className="mx-0 sm:mx-12 flex items-center" onSubmit={beginGeneration}>
+          {balance && <h4 class="text-2xl font-bold dark:text-white mx-0 sm:mx-12 sm:mt-0">Credits: {balance.toString().substring(0, 5)}</h4>}
+
+          <form className="mx-0 sm:mx-12 flex" onSubmit={beginGeneration}>
             <div className='w-full py-2 px-4 block'>
               <textarea
                 className="w-full h-28 resize-none placeholder-gray-500 focus:outline-none focus:bg-white focus:shadow-outline focus:border-blue-300 dark:bg-gray-900 dark:text-gray-300 dark:focus:bg-gray-800 dark:focus:border-blue-300 dark:placeholder-gray-400 dark:border-gray-600 rounded-md border-gray-300 sm:text-md mb-2 md:mb-0"
@@ -89,7 +102,7 @@ const ImageGeneration = () => {
               </textarea>
               {message.promptsMessage && <p class={`mt-2 text-sm text-red-700 dark:text-red-500`}><span class="font-medium"></span>{message.promptsMessage}</p>}
             </div>
-            
+            <div className="space-y-2 pt-2 self-center">
             <button disabled={imageLoading} className="bg-gray-900 whitespace-nowrap hover:bg-gray-700 text-white px-4 py-4 ml-4 rounded-md text-md">
             {imageLoading && <svg aria-hidden="true" role="status" class="inline w-6 h-6 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
@@ -97,6 +110,7 @@ const ImageGeneration = () => {
             </svg>}
               {(imageLoading) ? "Generating..." : "Lets Go!"}
             </button>
+            </div>
           </form>
           <div className="h-3/4 border border-solid p-4 sm:p-8 border-white dark:border-gray-500 mx-0 sm:mx-12 sm:mt-10">
             {(!imageURL && !imageLoading) && <h3 className="text-3xl font-bold text-gray-500 dark:text-white text-center">Generated image will be displayed here</h3>}

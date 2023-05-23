@@ -15,6 +15,16 @@ export const getImages = () => {
 }
 
 // Paginate and get User private images.
-export const getUserImages = () => {
-
+export const getUserImages = async (page, limit) => {
+  try{
+    const response = await axios.get("/images/user", {
+      params: {
+        page,
+        limit
+      }
+    });
+    return response;
+  }catch(e){
+    return e;
+  }
 }

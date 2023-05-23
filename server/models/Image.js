@@ -29,7 +29,9 @@ const imageSchema = new mongoose.Schema({
   steps: {
     type: Number,
     required: true,
-  },
+  }
+}, {
+  timestamps: true
 });
 
 
