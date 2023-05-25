@@ -9,7 +9,7 @@ const { img } = require('../constants/testimg');
 
 // ADD 1. Rate Limiter, 2. Cache
 
-// 2. GET_All images (Curso based pagination)
+// 2. GET_All images (Cursor based pagination)
 router.get("/all", async (req, res) => {
   try{
     const { cursor = null, limit = 8 } = req.query;
@@ -132,6 +132,30 @@ router.post("/generate/text2img", ensureAuthenticated, async (req, res) => {
 
 // 4. DELETE_USER Image-PROTECTED
 router.delete("/user/:id")
+
+router.put('/post/:id', async (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+
+  try {
+    const image = await Image.findById(id);
+
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+
+    // Update the title field only
+    image.title = title;
+
+    // Save the updated image to the database
+    await image.save();
+
+    res.json({ message: 'Image title updated successfully', image });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 module.exports = router;

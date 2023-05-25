@@ -24,11 +24,12 @@ module.exports = {
         primarydark: 'das',
         secondarydark: 'asd',
       },
-    },
+    }
   },
   plugins: [
     require("tw-elements/dist/plugin"), 
-    require('flowbite/plugin')
+    require('flowbite/plugin'),
+    require('tailwind-scrollbar'),
   ],
 };
 

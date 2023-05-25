@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux';
 import { Tab } from '@headlessui/react';
-import Avatar from '../components/Avatar';
-import { getUserImages } from "../app/services/image.service";
+
+import {Avatar, Alert} from '../components';
+import { getUserImages, postImage } from "../app/services/image.service";
 
 const Profile = () => {
   const user = useSelector((state) => state.user)
@@ -11,7 +12,7 @@ const Profile = () => {
     <>
     <div className="min-h-screen space-y-8 flex flex-col align-center mx-8 sm:mx-16 lg:mx-32 py-6 sm:py-8 lg:py-12">
       <div className="min-w-full">
-        <Avatar />
+        <Avatar />  
       </div>
 
       <div className="min-w-full">
@@ -31,9 +32,123 @@ function TabComponent({ user }) {
     return classes.filter(Boolean).join(' ');
   }
 
-  const ImageGallery = ({ images, loadingStatus, setLoadingStatus }) => {
+  const Modal = ({ activeImage, setActiveImage, setActiveAlert }) => {
+    const [showModal, setShowModal] = useState(false);
+    const modalRef = useRef(null);
+    const [imageTitle, setImageTitle] = useState(null);
+    const [showMessage, setShowMessage] = useState("Image posted succesffully!");
+    const errorStyle = "focus:ring-red-500 focus:border-red-500 dark:focus:ring-red-500 dark:focus:border-red-500";
+    const textRef = useRef();
+    
+    useEffect(() => {
+      (activeImage) ? setShowModal(true) : setShowModal(false)
+      setShowMessage(null);
+      setImageTitle(null);
+    }, [activeImage])
+
+    useEffect(() => {
+      function handleClickOutside(event) {
+        if (modalRef.current && !modalRef.current.contains(event.target)) {
+          setShowModal(false);
+          setActiveImage(null);
+        }
+      }
+      if(activeImage) 
+      document.addEventListener('click', handleClickOutside);  
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }, [activeImage]);  
+
+    const publishImage = async () => {
+      if(!imageTitle){
+        textRef.current.focus();
+        setShowMessage("Error: Need to add an image title");
+        return;
+      }
+      try{
+        const response = await postImage(activeImage._id, imageTitle);
+        setActiveAlert({
+          type: "success",
+          message: "Image posted succesffully!"
+        });
+      }catch(e){
+        const msg = (e && e.message) || e.toString();
+        setActiveAlert({
+          type: "error",
+          message: `Error: ${msg}`
+        });
+      }
+    }
+
+    return (
+      <>
+        {
+        showModal ?
+         (
+          <>
+            <div
+              className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
+            >
+              <div className="relative w-auto my-6 mx-auto max-w-fit" ref={modalRef}>
+                {/*content*/}
+                <div className="dark:bg-gray-800 dark:text-gray-100 border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                  {/*header*/}
+                  <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t">
+                    <h3 className="text-3xl font-semibold">
+                      {(activeImage.title) ? activeImage.title :
+                      <input ref={textRef} onChange={(e) => setImageTitle(e.target.value)} value={imageTitle} placeholder='Enter Image Title' type="text" id="default-input" class={`bg-transparent text-gray-900 border-none text-2xl rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:placeholder-white dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${(showMessage && showMessage.slice(0,5)==="Error") && errorStyle}`}/>}
+                      {(showMessage && showMessage==="Error: Need to add an image title") && <p className='text-sm px-3 text-red-600'>{showMessage}</p>}
+                    </h3>
+                    <button
+                      className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                      onClick={() => setShowModal(false)}
+                    >
+                      <span className="bg-transparent text-black dark:text-gray-100 opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
+                        ×
+                      </span>
+                    </button>
+                  </div>
+                  {/*body*/}
+                  <div className="relative p-3 flex flex-row">
+                    <div className="p-3 mr-4">
+                      <img className="h-auto max-w-lg rounded-lg" src={activeImage.url} alt="Selected Image" />
+                    </div>
+                    <div class="w-full space-y-5 text-base lg:w-3/5 lg:px-10"> 
+                      <h2 class="text-xl font-semibold mb-2">Prompts</h2>  
+                      <textarea class="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 resize-none lg:w-96 h-40 px-4 py-2 border border-gray-300 rounded-xl focus:outline-none disabled:bg-gray-300 disabled:text-gray-700 dark:disabled:bg-gray-600 dark:disabled:text-gray-100 dark:border-gray-600 dark:bg-gray-700" disabled>{activeImage.textPrompts}</textarea>       
+                      <h2 class="text-xl font-semibold my-6">Negative Prompts</h2>       
+                      <textarea class="scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 resize-none lg:w-96 h-40 px-4 py-2 border border-gray-300 rounded-xl disabled:bg-gray-300 disabled:text-gray-700 dark:disabled:bg-gray-600 dark:disabled:text-gray-100 dark:border-gray-600 dark:bg-gray-700" disabled>{activeImage.negativePrompts}</textarea>  
+                      <div class="flex flex-col space-y-3 lg:space-y-0 lg:flex-row lg:space-x-10">
+                        <div class="w-full">       
+                          <h2 class="text-xl font-semibold">Steps</h2>  
+                          <p class="text-gray-500 dark:text-gray-400">{activeImage.steps}</p> 
+                        </div>
+                        <div class="w-full mt-5">  
+                          <h2 class="text-xl font-semibold">Seed</h2>  
+                          <p class="text-gray-500 dark:text-gray-400">{activeImage.seed}</p>    
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/*footer*/}
+                  <div className="flex justify-end p-6 border-t border-solid border-slate-200 rounded-b">
+                  {(activeImage && !activeImage.title) &&
+                    <button onClick={publishImage} type="button" class="self-end text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-400 dark:focus:ring-blue-500 dark:border-blue-500">Publish Image</button>}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+          </>
+        ) : null}
+      </>
+    );
+  }
+  
+
+  const ImageGallery = ({ images, loadingStatus, setLoadingStatus, setActiveImage }) => {
     const handleImageLoad = (index) => {
-      console.log(index, loadingStatus[index])
       setLoadingStatus((prevLoadingStatus) => {
         const updatedLoadingStatus = [...prevLoadingStatus];
         updatedLoadingStatus[index] = false;
@@ -75,7 +190,7 @@ function TabComponent({ user }) {
           <div>
             {renderSpinner(index)}
             <div key={image._id} >
-              <img className="sm:max-h-64 max-w-full rounded-lg" src={image.url} alt={image.url} onLoad={() => handleImageLoad(index)}  onError={() => handleImageError(index)} />
+              <img className="sm:max-h-64 max-w-full rounded-lg" src={image.url} alt={image.url} onClick={() => setActiveImage(image)} onLoad={() => handleImageLoad(index)}  onError={() => handleImageError(index)} />
             </div>
           </div>
         )
@@ -90,6 +205,8 @@ function TabComponent({ user }) {
     const [images, setImages] = useState(null);
     const LIMIT = 8;
     const [loadingStatus, setLoadingStatus] = useState(Array(LIMIT).fill(true));
+    const [activeImage, setActiveImage] = useState(null);
+    const [activeAlert,setActiveAlert] = useState(null);
     
     useEffect(() => {
       async function loadImages() {
@@ -108,7 +225,8 @@ function TabComponent({ user }) {
 
     return(
       <div className="py-6 space-y-6 px-5 overflow-y-auto flex flex-col">
-        <ImageGallery images={images} limit={LIMIT} loadingStatus={loadingStatus} setLoadingStatus={setLoadingStatus}/>
+        {(!activeAlert) && <Modal activeImage={activeImage} setActiveImage={setActiveImage} setActiveAlert={setActiveAlert} /> || <Alert type={activeAlert.type} message={activeAlert.message} setActiveAlert={setActiveAlert}/>}
+        <ImageGallery images={images} limit={LIMIT} loadingStatus={loadingStatus} setLoadingStatus={setLoadingStatus} setActiveImage={setActiveImage}/>
         <div class="inline-flex rounded-md shadow-sm self-center pt-6" role="group">
           <button onClick={() => {
             if(page<=1) return;
@@ -140,6 +258,7 @@ function TabComponent({ user }) {
       </div>
     )
   }
+
   const UserProfileTab = () => {
     return(
       <div className="py-6 space-y-6 px-5">
@@ -172,7 +291,7 @@ function TabComponent({ user }) {
         <Tab.Group
           as="div"
           onChange={setCurrentTab}
-          className="shadow-lg rounded-lg overflow-auto bg-gray-50 dark:bg-gray-800 "
+          className="scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-100 shadow-lg rounded-lg overflow-auto bg-gray-50 dark:bg-gray-800 "
         >
           <Tab.List
             className="px-4 py-2 flex border-b border-gray-200 dark:border-gray-700"

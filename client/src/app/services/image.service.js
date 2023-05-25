@@ -14,6 +14,7 @@ export const getImages = () => {
 
 }
 
+
 // Paginate and get User private images.
 export const getUserImages = async (page, limit) => {
   try{
@@ -27,4 +28,9 @@ export const getUserImages = async (page, limit) => {
   }catch(e){
     return e;
   }
+}
+
+export const postImage = async (id, newTitle) => {
+    const response = await axios.put(`/images/post/${id}`, { title: newTitle });
+    return response;
 }

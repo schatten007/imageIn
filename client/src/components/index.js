@@ -6,6 +6,8 @@ import SearchBox from "./SearchBox";
 import ImageGallery from "./ImageGallery";
 import LoadingSpinner from "./LoadingSpinner";
 import ProtectedRoute from "./ProtectedRoute";
+import Alert from "./Alert";
+import Avatar from "./Avatar";
 
 export { 
     Navbar,
@@ -15,5 +17,7 @@ export {
     SearchBox,
     ImageGallery,
     LoadingSpinner,
-    ProtectedRoute
+    ProtectedRoute,
+    Alert,
+    Avatar
  };
